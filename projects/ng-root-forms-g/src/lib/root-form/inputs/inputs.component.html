@@ -1,0 +1,245 @@
+<ng-container *ngIf="inpTemplate!.type === typeCheckbox;else notCheckbox">
+  <div class="form-group mb-3" [ngClass]="inpTemplate!.disposition=='horizontal'?'col':'row'"  >
+    <label
+      #labelsRoot
+      class="col-md-3 col-form-label"
+      [ngClass]="{ 'text-danger font-weight-bold': warned || invalid}"
+      [for]="this.inpTemplate?.name"
+      >{{ label }}
+      <strong *ngIf="inpTemplate!.requiredState" class="leyenda-req-2">*</strong>
+    </label>
+    <div [ngClass]="inpTemplate!.disposition=='horizontal'?'col-md-12':'col-md-9'">
+      <div [ngClass]="inpTemplate!.disposition=='horizontal'?'space-x-4':''">
+      <div class="form-check" *ngFor="let option of selectOptions" [ngClass]="inpTemplate!.disposition=='horizontal'?'form-check-inline':''">
+          <input
+              #inputRoot
+              type="checkbox"
+              class="form-check-input"
+              [ngClass]="{ 'is-warned': warned || invalid}"
+              [value]="option[inpTemplate!.optionsValueAccess!]"
+              [id]="option[inpTemplate!.optionsValueAccess!]"
+              (click)="updatingCheckboxs(option[inpTemplate!.optionsValueAccess!])"
+              [checked]="control.value?.includes(option[inpTemplate!.optionsValueAccess!])"
+            />
+            <label #labelsRoot [for]="option[inpTemplate!.optionsValueAccess!]" class="form-check-label">{{
+              option[inpTemplate!.optionsDescriptionAccess!]
+            }}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+</ng-container>
+<ng-template #notCheckbox>
+  <div
+  class="mb-3 form-floating"
+  [ngClass]="{ 'input-group': inpTemplate!.prePendIcon || inpTemplate!.appendIcon }"
+  > 
+    <span *ngIf="inpTemplate!.prePendIcon || inpTemplate!.prePendText" class="input-group-text">
+      <i class="fa" [ngClass]="inpTemplate!.prePendIcon||''">{{inpTemplate!.prePendText}}</i>
+    </span>
+  <ng-container [ngSwitch]="inpTemplate!.type">
+    <ng-container *ngSwitchCase="typeDate">
+      <input
+        #inputRoot
+        [formControl]="control"
+        [id]="this.inpTemplate?.name"
+        (keyup)="dateMask($event)"
+        class="form-control"
+        [ngClass]="{
+          'is-invalid ': isInvalid() && isTouched(),
+          'is-valid-test': (!isInvalid()) && isTouched() && hasValue(),
+          'text-center': inpTemplate!.center,
+          'text-end': inpTemplate!.right || inpTemplate!.typeinput === 'number',
+          'is-warned': warned
+        }"
+        bsDatepicker
+        placeholder="dd/mm/aaaa"
+        #dp="bsDatepicker"
+        [bsConfig]="{
+          isAnimated: true,
+          dateInputFormat: 'DD/MM/YYYY',
+          containerClass: 'theme-dark-blue'
+        }"
+        [type]="inpTemplate!.typeinput"
+      />
+    </ng-container>
+    <ng-container *ngSwitchCase="typeZerofill">
+      <input
+        #inputRoot
+        [formControl]="control"
+        class="form-control text-right"
+        (keyup)="zerofillMask($event, inpTemplate!.zerofill!)"
+        [ngClass]="{
+          'is-invalid ': isInvalid() && isTouched(),
+          'is-valid-test': (!isInvalid()) && isTouched() && hasValue(),
+          'text-center': inpTemplate!.center,
+          'text-end': inpTemplate!.right || inpTemplate!.typeinput === 'number',
+          'is-warned': warned
+        }"
+        [placeholder]="inpTemplate!.placeholder ||' '"
+        [id]="this.inpTemplate?.name"
+        [type]="inpTemplate!.typeinput ||'text'"
+      />
+    </ng-container>
+    <ng-container *ngSwitchCase="typeCuit">
+      <input
+        #inputRoot
+        [formControl]="control"
+        (keyup)="cuitMask($event)"
+        class="form-control tex-right"
+        [ngClass]="{
+          'is-invalid ': isInvalid() && isTouched(),
+          'is-valid-test': (!isInvalid()) && isTouched() && hasValue(),
+          'text-center': inpTemplate!.center,
+          'text-end': inpTemplate!.right || inpTemplate!.typeinput === 'number',
+          'is-warned': warned
+        }"
+        [placeholder]="inpTemplate!.placeholder || ' '"
+        [id]="this.inpTemplate?.name"
+        [type]="inpTemplate!.typeinput|| 'text'"
+      />
+    </ng-container>
+    <ng-container *ngSwitchCase="typeURL">
+      <input
+        #inputRoot
+        [formControl]="control"
+        (keyup)="urlMask($event)"
+        class="form-control tex-right"
+        [ngClass]="{
+          'is-invalid ': isInvalid() && isTouched(),
+          'is-valid-test': (!isInvalid()) && isTouched() && hasValue(),
+          'text-center': inpTemplate!.center,
+          'text-end': inpTemplate!.right || inpTemplate!.typeinput === 'number',
+          'is-warned': warned
+        }"
+        [placeholder]="inpTemplate!.placeholder|| ' '"
+        [id]="this.inpTemplate?.name"
+        [type]="inpTemplate!.typeinput || 'text'"
+      />
+    </ng-container>
+    <ng-container *ngSwitchCase="typeTextarea">
+      <textarea
+        #inputRoot
+        [formControl]="control"
+        style="height: 200px"
+        class="form-control"
+        [ngClass]="{
+          'is-invalid ': isInvalid() && isTouched(),
+          'is-valid-test': (!isInvalid()) && isTouched() && hasValue(),
+          'text-center': inpTemplate!.center,
+          'text-end': inpTemplate!.right || inpTemplate!.typeinput === 'number',
+          'is-warned': warned
+        }"
+        [placeholder]="inpTemplate!.placeholder || ' '"
+        [id]="this.inpTemplate?.name"
+      >
+      <!-- <pre class="ace_editor ace_hidpi ace-monokai ace_dark">{{control.value}}</pre> -->
+      </textarea>
+    </ng-container>
+    <ng-container *ngSwitchCase="typeSelect">
+      <select
+      #inputRoot
+      [id]="this.inpTemplate?.name"
+      [formControl]="control"
+      class="form-select"
+      [ngClass]="{
+        'is-invalid ': isInvalid() && isTouched(),
+        'is-valid-test': (!isInvalid()) && isTouched() && hasValue(),
+        'text-center': inpTemplate!.center,
+        'text-end': inpTemplate!.right,
+        'is-warned': warned
+      }"
+    >
+      <option *ngIf="!inpTemplate!.nullable" [value]="null" disabled>
+        {{ inpTemplate!.placeholder || "Seleccione .." }}
+      </option>
+      <option
+        *ngFor="let option of selectOptions"
+        [value]="option[inpTemplate!.optionsValueAccess!]"
+        (click)="selected = option"
+      >
+        {{ option[inpTemplate!.optionsDescriptionAccess!] }}
+      </option>
+    </select>
+    </ng-container>
+    <ng-container *ngSwitchCase="typeEditor">
+      <p
+        #labelRoot
+        class="form-label mb-0"
+        [ngClass]="{
+          'custom-floated': inpTemplate!.prePendIcon,
+          'text-danger font-weight-bold': warned || invalid
+    
+        }"
+        >{{ label }} <small *ngIf="inpTemplate!.sublabel">{{inpTemplate!.sublabel}}</small>
+        <strong *ngIf="inpTemplate!.requiredState" class="leyenda-req-2">*</strong>
+      </p>
+          <div
+          #editor
+          class="app-ace-editor"
+        ></div>
+    </ng-container>
+    <ng-container *ngSwitchCase="typeTags">
+      <div 
+        class="form-control"
+    
+        [ngClass]="{
+          'custom-floated': inpTemplate!.prePendIcon,
+          'text-danger font-weight-bold': warned || invalid
+        }"
+        style="height:fit-content;"
+        > <label [for]="this.inpTemplate?.name">{{ label }} <small *ngIf="inpTemplate!.sublabel">{{inpTemplate!.sublabel}}</small>
+          <strong *ngIf="inpTemplate!.requiredState" class="leyenda-req-2">*</strong>
+          <ng-container *ngIf="control.value?.length">
+            <span class="chip-tags" *ngFor="let selection of control.value">{{selection[inpTemplate!.optionsDescriptionAccess!]}}<i (click)="removeValue(selection)" class="text-danger ms-2 fas fa-times-circle" style="cursor:pointer"></i></span>
+          </ng-container>
+        </label><br>
+          <input appClickOutside (clickedOutside)="cleanFilterOptions()" (keydown)="handlerKeyTags($event)" [formControl]="filterForTags" [id]="this.inpTemplate?.name" class="chips-input"  />
+          <div class="personal-chip-options-wrapper" *ngIf="filterOptions?.length">
+            <option class="option" (click)="pushToSelection(filter)" *ngFor="let filter of filterOptions">
+              {{filter[inpTemplate!.optionsDescriptionAccess!]}}
+            </option>
+          </div>
+      </div>
+    </ng-container>
+    <ng-container *ngSwitchDefault>
+      <input
+        #inputRoot
+        [formControl]="control"
+        class="form-control"
+        [ngClass]="{
+          'is-invalid ': isInvalid() && isTouched(),
+          'is-valid-test': (!isInvalid()) && isTouched() && hasValue(),
+          'text-center': inpTemplate!.center,
+          'text-end': inpTemplate!.right || inpTemplate!.typeinput === 'number',
+          'is-warned': warned
+        }"
+        [step]="inpTemplate?.step"
+        [min]="inpTemplate?.min"
+        [max]="inpTemplate?.max"
+        [placeholder]="inpTemplate!.placeholder || ' '"
+        [id]="this.inpTemplate?.name"
+        [type]="inpTemplate!.typeinput || 'text'"
+      />
+    </ng-container>
+  </ng-container>
+  <label
+    #labelRoot
+    *ngIf="!(inpTemplate!.type===typeEditor) && !(inpTemplate!.type===typeTags)"
+    class="form-label"
+    [ngClass]="{
+      'custom-floated': inpTemplate!.prePendIcon,
+      'text-danger font-weight-bold': warned
+    }"
+    [for]="this.inpTemplate?.name"
+    >{{ label }} <small *ngIf="inpTemplate!.sublabel">{{inpTemplate!.sublabel}}</small>
+    <strong *ngIf="inpTemplate!.requiredState" class="leyenda-req-2">*</strong>
+  </label>
+  <div *ngIf="control.hasError('incorrect')" class="invalid-feedback">
+    {{inpTemplate!.incorrectMessage}}
+  </div>
+  <span *ngIf="inpTemplate!.appendIcon || inpTemplate!.appendText" class="input-group-text"
+    ><i class="fa" [ngClass]="inpTemplate!.appendIcon || ''">{{inpTemplate!.appendText}}</i
+  ></span>
+  </div>
+</ng-template>

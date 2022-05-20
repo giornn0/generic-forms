@@ -1,0 +1,52 @@
+{{openForm?inpTemplate!.label:inpTemplate!.emptyLabel}}
+<div class="row align-items-center">
+  <ng-container *ngIf="openForm">
+    <ng-container *ngIf="inpTemplate!.openForm">
+      <ng-container *ngFor="let input of inputs">
+        <div [ngClass]="input.class">
+          <ng-container [ngSwitch]="input.type">
+            <ng-container *ngSwitchDefault>
+              <input-component
+                #inputs
+                [inpTemplate]="input"
+                [initialState]="initialState![input.name]"
+                [selectOptions]="selectOptions[input.name]"
+                (valueEmitted)="setValue($event)"
+                >
+            </input-component>
+            </ng-container>
+          </ng-container>
+        </div>
+      </ng-container>
+    </ng-container>
+    <ng-container *ngFor="let listed of created;index as index">
+        <ng-container *ngFor="let input of inputs">
+          <div [ngClass]="input.class">
+            <ng-container [ngSwitch]="input.type">
+              <ng-container *ngSwitchDefault>
+                <input-component
+                  #inputs
+                  [inpTemplate]="input"
+                  [initialState]="initialState![input.name]"
+                  [selectOptions]="selectsOptions[index][input.name]"
+                  [value]="listed[input.name]"
+                  (valueEmitted)="editValue($event,index)"
+                  >
+              </input-component>
+              </ng-container>
+            </ng-container>
+          </div>
+        </ng-container>
+        <div class="col-sm-1 mb-3">
+          <i class="btn btn-danger fas fa-times" (click)="alertForRemove(index)"></i>
+        </div>
+    </ng-container>
+  </ng-container>
+  <ng-container >
+    <div class="col-sm-12 mb-4">
+      <div class="d-grid gap-2">
+        <button class="btn btn-primary" (click)="pushToCreated()" type="button">{{inpTemplate!.plusLabel}}</button>
+      </div>
+    </div>
+  </ng-container>
+</div>

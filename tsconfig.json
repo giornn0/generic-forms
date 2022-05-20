@@ -11,6 +11,12 @@
     "sourceMap": true,
     "declaration": false,
     "downlevelIteration": true,
+    "paths": {
+      "ng-root-forms-g": [
+        "dist/ng-root-forms-g/ng-root-forms-g",
+        "dist/ng-root-forms-g"
+      ]
+    },
     "experimentalDecorators": true,
     "moduleResolution": "node",
     "importHelpers": true,

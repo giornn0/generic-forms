@@ -1,0 +1,232 @@
+<ng-container *ngIf="inpTemplate?.multiple; else notMultiple">
+  <div
+    class="form-group-row p-3 mb-3"
+    [ngClass]="!fileName ? 'encuadre-secondary' : 'encuadre-secondary'"
+    *ngFor="let fileName of fileNames; index as index"
+  >
+    <div class="col-12">
+      <div class="row mt-2">
+        <ng-container *ngIf="index === 0">
+          <div class="col-12" (click)="labelRoot.click()">
+            <div class="form-group-row">
+              <label
+                class="form-label"
+                [ngClass]="{
+                  'text-danger font-weight-bold': warned,
+                  'text-missing font-weight-bold': invalid
+                }"
+                [for]="inpTemplate?.multiple ? index + '-input' + inpTemplate?.name : inpTemplate?.name"
+                >{{ inpTemplate?.label }} <small *ngIf="inpTemplate?.sublabel">{{ inpTemplate?.sublabel }}</small>
+                <strong *ngIf="inpTemplate?.required" class="leyenda-req-2">*</strong></label
+              >
+            </div>
+          </div>
+        </ng-container>
+        <div class="col-12">
+          <div class="row align-items-center">
+            <div class="col-6">
+              <label
+                #labelRoot
+                class="text-left"
+                [ngClass]="{
+                  'text-danger font-weight-bold': warned,
+                  'text-missing font-weight-bold': invalid
+                }"
+                [for]="index + '-input' + inpTemplate?.name"
+              >
+                {{
+                  fileName
+                    ? fileName
+                    : fileNames.length > 1 || downloadFiles?.length
+                    ? "AGREGAR ARCHIVOS"
+                    : "SIN ARCHIVOS"
+                }}
+              </label>
+            </div>
+            <div class="col-6">
+              <div class="row float-end">
+                <div
+                  class="col-sm-6"
+                  [ngClass]="fileName ? 'pe-1' : ''"
+                  (click)="labelRoot.click()"
+                >
+                  <button
+                    [matTooltip]="fileName ? 'Cambiar' : 'Adjuntar'"
+                    class="btn text-white font-weight-bold"
+                    type="button"
+                    [ngClass]="
+                      fileName ? 'btn-secondary active' : 'btn-success'
+                    "
+                  >
+                    <i
+                      class="fas"
+                      [ngClass]="fileName ? 'fa-sync-alt' : 'fa-plus-square'"
+                    ></i>
+                  </button>
+                </div>
+                <div
+                  class="col-sm-6 ps-1"
+                  *ngIf="fileName"
+                  (click)="removeListedFile(index, fileName)"
+                >
+                  <button
+                    class="btn btn-danger text-white fon-weight-bold"
+                    type="button"
+                    matTooltip="Eliminar"
+                  >
+                    <i class="fas fa-minus-circle"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input
+      type="file"
+      style="display: none"
+      [multiple]="inpTemplate?.multiple"
+      [id]="index + '-input' + inpTemplate?.name"
+      (change)="uploadItemMultiple($event, index)"
+      [accept]="inpTemplate?.accepts"
+    />
+  </div>
+</ng-container>
+<ng-container *ngIf="downloadFiles.length">
+  <strong>{{ inpTemplate?.repoTitle || "Archivos Subidos" }}</strong
+  ><br />
+  <ng-container *ngFor="let uploadedFile of downloadFiles">
+    <label class="me-2 mb-2 btn text-white" [ngClass]="'btn-secondary active'">
+      <a
+        [matTooltip]="'Descargar'"
+        class="text-white"
+        [href]="uploadedFile.url"
+        target="_blank"
+        [download]="uploadedFile.name"
+      >
+        <i class="fa fas me-2 text-success" [ngClass]="uploadedFile.icon"></i
+        >{{ uploadedFile.name }}
+      </a>
+      <i
+        [matTooltip]="'Quitar'"
+        (click)="removeFileFromDrive(uploadedFile.name)"
+        class="fa fas fa-minus-circle text-danger m-0 ms-2"
+        style="transform: scale(1.5)"
+      ></i>
+    </label>
+  </ng-container>
+</ng-container>
+<ng-template #notMultiple>
+  <div
+    class="form-group-row p-3 mb-3"
+    [ngClass]="!fileName ? 'encuadre-secondary' : 'encuadre-secondary'"
+  >
+    <div class="col-12">
+      <div class="row mt-2">
+        <ng-container>
+          <div class="col-12" (click)="labelRoot.click()">
+            <div class="form-group-row">
+              <label
+                class="form-label"
+                [ngClass]="{
+                  'text-danger font-weight-bold': warned,
+                  'text-missing font-weight-bold': invalid
+                }"
+                >{{ inpTemplate?.label }} <small *ngIf="inpTemplate?.sublabel">{{ inpTemplate?.sublabel }}</small>
+                <strong *ngIf="inpTemplate?.required" class="leyenda-req-2">*</strong></label
+              >
+            </div>
+          </div>
+        </ng-container>
+        <div class="col-12">
+          <div class="row align-items-center">
+            <div class="col-6">
+              <ng-container *ngIf="inpTemplate?.previewImg && fileName">
+                  <img
+                    [matTooltip]="!(hasDefaultImage()) ? 'Zoom' : 'Cargar'"
+                    (click)="imageAction()"
+                    class="img-fluid options-item"
+                    style="
+                      height: 6rem;
+                      width: 6rem;
+                      border-radius: 3rem;
+                      cursor: pointer;
+                      object-fit: cover;
+                    "
+                    [src]="fileUrl || fileForEditURL"
+                  />
+              </ng-container>
+              <label
+                #labelRoot
+                class="text-left"
+                [ngClass]="{
+                  'text-danger font-weight-bold': warned,
+                  'text-missing font-weight-bold': invalid,
+                  'ms-2': inpTemplate?.previewImg && fileName
+                }"
+                [for]="inpTemplate?.name"
+              >
+                {{ fileName && !hasDefaultImage() ? fileName : "SIN ARCHIVO" }}
+              </label>
+            </div>
+            <div class="col-6">
+              <div class="row float-end">
+                <div
+                  class="col-sm-6"
+                  (click)="labelRoot.click()"
+                  [ngClass]="
+                    (fileForEditURL || fileUrl) && !inpTemplate?.previewImg ? 'pe-1' : ''
+                  "
+                >
+                  <button
+                    [matTooltip]="
+                      fileName && !hasDefaultImage() ? 'Cambiar' : 'Cargar'
+                    "
+                    class="btn btn-block text-white font-weight-bold"
+                    [ngClass]="
+                      fileName && !hasDefaultImage()
+                        ? 'btn-secondary active'
+                        : 'btn-success'
+                    "
+                  >
+                    <i
+                      class="fas"
+                      [ngClass]="
+                        fileName && !hasDefaultImage()
+                          ? 'fa-sync-alt'
+                          : 'fa-plus-square'
+                      "
+                    ></i>
+                  </button>
+                </div>
+                <div
+                  class="col-sm-6 ps-1"
+                  *ngIf="fileForEditURL && !inpTemplate?.previewImg"
+                >
+                  <a
+                    class="btn btn-primary active text-white font-weight-bold float-end"
+                    [matTooltip]="'Previo/a'"
+                    [href]="fileForEditURL"
+                    [download]="downloadName"
+                    [target]="'_blank'"
+                  >
+                    <i class="fas fa-file-download"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <input
+      type="file"
+      style="display: none"
+      [multiple]="inpTemplate?.multiple"
+      [id]="inpTemplate?.name"
+      (change)="uploadItem($event)"
+      [accept]="inpTemplate?.accepts"
+    />
+  </div>
+</ng-template>

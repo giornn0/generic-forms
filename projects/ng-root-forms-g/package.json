@@ -1,0 +1,13 @@
+{
+  "name": "ng-root-forms-g",
+  "version": "0.0.1",
+  "peerDependencies": {
+    "@angular/common": "^12.2.0",
+    "@angular/core": "^12.2.0"
+  },
+  "dependencies": {
+    "ngx-bootstrap": "^6.2.0",
+    "ace-builds": "^1.4.14",
+    "tslib": "^2.3.0"
+  }
+}

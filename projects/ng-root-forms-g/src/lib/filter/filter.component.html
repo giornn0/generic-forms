@@ -1,0 +1,259 @@
+<div class="row">
+  <div class="col-12">
+    <form
+      [formGroup]="filterForm"
+      *ngIf="!inpTemplate?.forSelection || !control.value.length"
+    >
+      <div class="row">
+        <label
+          class="form-label"
+          [ngClass]="{ 'text-missing font-weight-bold': invalid }"
+          >{{ label }}
+          <small *ngIf="inpTemplate?.sublabel">{{
+            inpTemplate?.sublabel
+          }}</small>
+          <strong *ngIf="inpTemplate?.required" class="leyenda-req-2"
+            >*</strong
+          ></label
+        >
+        <div
+          [ngClass]="filtro.class"
+          *ngFor="let filtro of inpTemplate?.filters"
+        >
+          <div
+            class="form-floating"
+            [ngClass]="{
+              'mb-3': !selections.length && !optionsForSelection?.length
+            }"
+          >
+            <input
+              #filterInputs
+              [id]="filtro.name"
+              class="form-control"
+              [value]="null"
+              [type]="filtro.type ? filtro.type : 'text'"
+              [formControlName]="filtro.name"
+              placeholder=".."
+            />
+            <label [for]="filtro.name" class="form-label">{{
+              filtro.label
+            }}</label>
+          </div>
+        </div>
+        <div class="col-sm-4" *ngIf="inpTemplate?.forQuantity">
+          <div class="row">
+            <div class="col-6">
+              <div
+                class="form-floating"
+                [ngClass]="{
+                  'mb-3': !selections.length && !optionsForSelection?.length
+                }"
+              >
+                <input
+                  #filterInputs
+                  [id]="'selector-quantity'"
+                  class="form-control"
+                  [value]="0"
+                  [type]="'number'"
+                  [formControl]="quantity!"
+                  placeholder=".."
+                />
+                <label [for]="'selector-quantity'" class="form-label"
+                  >Cantidad</label
+                >
+              </div>
+            </div>
+            <div class="col-6">
+              <button class="btn btn-block btn-primary ms-3 py-3">
+                <i class="fas fa-plus-square me-2"></i>Agregar
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+    <div class="col-12" *ngIf="refreshingFilter">
+      <div class="d-flex justify-content-center display-4">
+        <i class="fa fa-spinner fa-spin fa-2x fa-align-center"></i>
+      </div>
+    </div>
+    <div
+      class="col-12 mb-3"
+      *ngIf="optionsForSelection?.length && !refreshingFilter"
+    >
+      <div *ngFor="let option of optionsForSelection; index as ind">
+        <div
+          *ngIf="!isSelectedForTheFilter(option)"
+          class="form-check form-block js-animation-object animated"
+          [ngClass]="option['classAnimationIn']?.toString() || ''"
+        >
+          <input
+            #filterOptions
+            [id]="'option-' + option['id']"
+            (keydown)="actionsFilter($event, ind)"
+            class="form-check-input"
+            (click)="
+              pushToFilter(option); option['classAnimationIn'] = 'fadeOutDown'
+            "
+          />
+          <label [for]="'option-' + option['id']" class="form-check-label">
+            <span class="d-flex align-items-center">
+              <span class="bg-secondary p-1" style="border-radius: 2rem">
+                <i class="fas fa-user"></i>
+              </span>
+              <span class="ms-2">
+                <span class="fw-bold">{{
+                  option[inpTemplate?.titleAccess!]
+                }}</span>
+                <span class="d-block fs-sm text-muted"
+                  >{{ option[inpTemplate?.descriAccess1!] }} -
+                  {{
+                    inpTemplate?.descriAccess2 == "sexo"
+                      ? option[inpTemplate?.descriAccess2!] == 1
+                        ? "Masculino"
+                        : "Femenino"
+                      : option[inpTemplate?.descriAccess2!]
+                  }}</span
+                >
+              </span>
+            </span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div
+      class="col-12 mb-2"
+      [ngClass]="{ 'mt-2': !inpTemplate?.forSelection }"
+      *ngIf="selections.length"
+    >
+      {{ inpTemplate?.selectedTitle }}
+      <div
+        *ngFor="let option of selections; index as rowIndex"
+        class="form-check form-block js-animation-object animated fadeInDown"
+        [ngClass]="option['classAnimationOut']?.toString() || ''"
+      >
+        <input
+          [id]="'selected-' + option['id']"
+          class="form-check-input"
+          type="checkbox"
+          checked
+        />
+        <label
+          [for]="'selected-' + option['id']"
+          class="form-check-label-edited"
+        >
+          <span class="d-flex align-items-center">
+            <span class="bg-secondary p-1" style="border-radius: 2rem">
+              <i class="fas" [ngClass]="inpTemplate?.icon || 'fa-user'"></i>
+            </span>
+            <span class="ms-2">
+              <span class="fw-bold">{{
+                option[inpTemplate?.titleAccess!]
+              }}</span>
+              <span class="d-block fs-sm text-muted"
+                >{{ option[inpTemplate?.descriAccess1!] }} -
+                {{
+                  inpTemplate?.descriAccess2 == "sexo"
+                    ? option[inpTemplate?.descriAccess2!] == 1
+                      ? "Masculino"
+                      : "Femenino"
+                    : option[inpTemplate?.descriAccess2!]
+                }}</span
+              >
+
+              <ng-container *ngIf="option['repository']">
+                <div >
+                  <div
+                    class="d-flex justify-content-center align-items-center"
+                  >
+                    <input
+                      #input
+                      hidden="true"
+                      type="file"
+                      style="display: none"
+                      [multiple]="true"
+                      (change)="uploadItemMultiple(option['id'], $event, rowIndex)"
+                    />
+  
+                    <i
+                      type="button"
+                      matTooltip="Añadir archivos"
+                      class="fas fa-book-medical fa-lg text-success"
+                      (click)="input.click()"
+                    >
+                    </i>
+  
+                    <i
+                      type="button"
+                      class="ms-1 text-primary fas"
+                      [matTooltip]="openRepository(rowIndex) ? 'Cerrar' : 'Abrir'"
+                      [ngClass]="
+                        openRepository(rowIndex)
+                          ? 'fa-book-open fa-lg'
+                          : 'fa-book fa-lg'
+                      "
+                      (click)="toggleRow(rowIndex)"
+                    ></i>
+  
+                   
+                  </div>
+                </div>
+
+                <span [hidden]="!openRepository(rowIndex)">
+                  <div class="row">
+                    <div class="col-12">
+                      <div
+                        class="btn text-white d-inline-block me-2 mb-2"
+                        *ngFor="let documental of option['repository']"
+                        [ngClass]="'btn-secondary active'"
+                      >
+                        <label class="" style="width: 8.5rem">
+                          <a
+                            class="text-white d-inline-block text-truncate"
+                            style="width: 100%"
+                            [href]="
+                              documental.upload
+                                ? documental.fileUrl
+                                : apiRoute + documental.fileUrl
+                            "
+                            target="_blank"
+                            [download]="documental.fileName"
+                            matTooltip="Descargar"
+                          >
+                            {{ documental.fileName }}
+                          </a>
+                        </label>
+                        <i
+                          (click)="
+                            removeFileFromDrive(
+                              documental.fileName,
+                              option['id'],
+                              rowIndex
+                            )
+                          "
+                          class="fas fa-minus-circle text-danger"
+                          style="transform: scale(1.5)"
+                          matTooltip="Eliminar"
+                        ></i>
+                      </div>
+                    </div>
+                  </div>
+                </span>
+              </ng-container>
+            </span>
+          </span>
+        </label>
+        <span *ngIf="!disabledCloseFilter" class="dashmix-close"
+          ><i
+            class="fa fa-window-close text-danger"
+            type="button"
+            (click)="
+              removeFromFilter(option);
+              option['classAnimationOut'] = 'zoomOutLeft'
+            "
+          ></i
+        ></span>
+      </div>
+    </div>
+  </div>
+</div>

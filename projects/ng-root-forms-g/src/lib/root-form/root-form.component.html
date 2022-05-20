@@ -1,0 +1,113 @@
+<div class="p-0 m-0">
+  <div class="block block-rounded">
+    <div class="block-header block-header-default" *ngIf="wantTitle">
+      <div class="form-title">
+        <strong>{{ title }}</strong>
+      </div>
+    </div>
+    <div class="block-content">
+      <div class="card-body" *ngIf="loadTemplate">
+        <form *ngIf="template && template.length">
+          <div *ngFor="let row of template">
+            <div class="row" *ngIf="row && row.length">
+              <div *ngFor="let col of row" [ngClass]="col.class"
+              >
+              <ng-container *ngIf="!col.hidden">
+                <ng-container [ngSwitch]="col.type">
+                  <ng-container *ngSwitchCase="fileType">
+                    <file-input
+                    #file
+                    [inpTemplate]="col"
+                    [warned]="warnedCamps.getValue().includes(col.name)"              
+                    [initialState]="initialStateControls![col.name]"
+                    [value]="forEdit?forEdit[col.name]:null"
+                    (fileSelected)="setValue($event,'file')"
+                    (fileDeleted)="deleteFile($event, col.name)"
+                    >
+                    </file-input>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="filterType">
+                    <filter-component
+                      #filter
+                      [idComprobante]="forEdit.id"
+                      [inpTemplate]="col"
+                      [initialState]="initialStateControls![col.name]"
+                      [value]="forEdit?forEdit[col.name]:null"
+                      [disabledCloseFilter]="disabledCloseFilter"
+                      [optionsForSelection]="defaultFilterOptions"
+                      (selectionOfAnObject)="setValue($event,'selection')"
+                      >
+                    </filter-component>
+                  </ng-container>
+                  <ng-container *ngSwitchCase="inlineFormType">
+                    <app-inline-form
+                      #inLine
+                      [inpTemplate]="col"
+                      [inputs]="InlineTemplates![col.name]"
+                      [initialState]="InlineStates![col.name]"
+                      [selectOptions]="selectOptions"
+                      [value]="forEdit?forEdit[col.name]:null"
+                      (changedValue)="setValue($event)"
+                      (removedInline)="removedInline.emit($event)"
+                      (changedReference)="inlineChanges.emit()"
+                    >
+                    </app-inline-form>
+                  </ng-container>
+                  <ng-container *ngSwitchDefault>
+                    <input-component
+                      #inputs
+                      [inpTemplate]="col"
+                      [warned]="warnedCamps.getValue().includes(col.name)"
+                      [initialState]="initialStateControls![col.name]"
+                      [selectOptions]="selectOptions[col.name]"
+                      [value]="forEdit?forEdit[col.name]:null"
+                      (valueEmitted)="setValue($event)"
+                      >
+                  </input-component>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+              </div>
+            </div>
+            <!-- SACAR EL col.required al chequeo del INVALIDA PARA EVITAR QUE SE PONGA EN ROJO CON EL TOUCH -->
+          </div>
+        </form>
+        <hr />
+      <ng-container *ngIf="wantRequiredLeyend">
+        Los campos marcados con <strong class="leyenda-req-2">*</strong> son
+        obligatorios
+      </ng-container>
+      </div>
+      <div #spinner class="row" *ngIf="!loadTemplate">
+        <div class="col-12 text-center m-2">
+          <i class="fa fa-spinner fa-spin fa-5x"></i>
+        </div>
+      </div>
+      <div class="card-footer" *ngIf="wantActions">
+        <div class="row d-flex justify-content-between">
+          <div class="col-6 col-md-4">
+            <button
+              class="btn btn-danger font-weight-bold text-white w-100"
+              matTooltip=""
+              (click)="back()"
+              >
+              <i class="fas fa-times-circle me-2"></i>
+              Cancelar
+          </button>
+          </div>
+          <div class="col-6 col-md-4">
+            <button
+              class="btn font-weight-bold text-white w-100"
+              [ngClass]="forEdit ? 'btn-success' : 'btn-primary'"
+              (click)="submit()"
+              [disabled]="this.form.invalid && disableIfInvalid"
+            >
+              <i class="fas me-2" [ngClass]="forEdit?'fa-save':'fa-plus-square'"></i>
+              {{ forEdit ? "Guardar" : "Crear" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
